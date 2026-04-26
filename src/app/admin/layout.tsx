@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 import { useRouter, usePathname } from "next/navigation";
 import Link from "next/link";
 import { motion, AnimatePresence } from "framer-motion";
@@ -10,12 +10,18 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
   const router = useRouter();
   const pathname = usePathname();
   const { isAuthenticated, isLoading, userEmail, logout, toasts, removeToast, isDemoMode } = useApp();
+  const [sidebarOpen, setSidebarOpen] = useState(false);
 
   useEffect(() => {
     if (!isLoading && !isAuthenticated) {
       router.replace("/login");
     }
   }, [isAuthenticated, isLoading, router]);
+
+  // Close sidebar on route change (mobile)
+  useEffect(() => {
+    setSidebarOpen(false);
+  }, [pathname]);
 
   if (isLoading) {
     return (
@@ -72,8 +78,58 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
 
   return (
     <div className="flex min-h-screen">
+      {/* Mobile Header Bar */}
+      <div className="fixed top-0 left-0 right-0 h-14 bg-white/90 backdrop-blur-xl border-b border-border/60 flex items-center px-4 z-[60] lg:hidden" style={{ boxShadow: "0 2px 12px rgba(0,0,0,0.04)" }}>
+        <button
+          onClick={() => setSidebarOpen(!sidebarOpen)}
+          className="p-2 -ml-1 rounded-lg text-foreground hover:bg-surface-2 transition-colors"
+          aria-label="Toggle menu"
+        >
+          <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+            {sidebarOpen ? (
+              <><line x1="18" y1="6" x2="6" y2="18" /><line x1="6" y1="6" x2="18" y2="18" /></>
+            ) : (
+              <><line x1="3" y1="6" x2="21" y2="6" /><line x1="3" y1="12" x2="21" y2="12" /><line x1="3" y1="18" x2="21" y2="18" /></>
+            )}
+          </svg>
+        </button>
+        <div className="flex items-center gap-2 ml-3">
+          <div
+            className="w-7 h-7 rounded-lg flex items-center justify-center"
+            style={{
+              background: "linear-gradient(135deg, rgba(27,79,114,0.15), rgba(184,134,11,0.15))",
+              border: "1px solid rgba(27,79,114,0.2)",
+            }}
+          >
+            <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" className="text-accent">
+              <rect x="3" y="3" width="7" height="7" /><rect x="14" y="3" width="7" height="7" />
+              <rect x="3" y="14" width="7" height="7" /><rect x="14" y="14" width="7" height="7" />
+            </svg>
+          </div>
+          <span className="text-sm font-bold text-foreground">ScanQ</span>
+        </div>
+      </div>
+
+      {/* Sidebar Overlay (mobile) */}
+      <AnimatePresence>
+        {sidebarOpen && (
+          <motion.div
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            className="fixed inset-0 bg-black/20 backdrop-blur-sm z-[69] lg:hidden"
+            onClick={() => setSidebarOpen(false)}
+          />
+        )}
+      </AnimatePresence>
+
       {/* Sidebar */}
-      <aside className="w-64 fixed top-0 left-0 h-full flex flex-col border-r border-border/60 bg-white/80 backdrop-blur-xl z-50" style={{ boxShadow: "4px 0 24px rgba(0,0,0,0.04)" }}>
+      <aside className={`
+        w-64 fixed top-0 left-0 h-full flex flex-col border-r border-border/60 bg-white/95 backdrop-blur-xl z-[70]
+        transition-transform duration-300 ease-[cubic-bezier(0.16,1,0.3,1)]
+        lg:translate-x-0
+        ${sidebarOpen ? "translate-x-0" : "-translate-x-full"}
+      `} style={{ boxShadow: "4px 0 24px rgba(0,0,0,0.06)" }}>
         {/* Logo */}
         <div className="p-6 border-b border-border">
           <Link href="/admin" className="flex items-center gap-3 no-underline">
@@ -92,7 +148,7 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
               </svg>
             </div>
             <div>
-              <h1 className="text-sm font-bold text-foreground leading-none">Company</h1>
+              <h1 className="text-sm font-bold text-foreground leading-none">ScanQ</h1>
               <p className="text-[10px] text-muted mt-0.5">Traceability</p>
             </div>
           </Link>
@@ -147,8 +203,8 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
       </aside>
 
       {/* Main content */}
-      <main className="flex-1 ml-64">
-        <div className="p-8 max-w-[1200px] mx-auto">
+      <main className="flex-1 lg:ml-64 pt-14 lg:pt-0">
+        <div className="p-4 sm:p-6 lg:p-8 max-w-[1200px] mx-auto">
           <AnimatePresence mode="wait">
             <motion.div
               key={pathname}
