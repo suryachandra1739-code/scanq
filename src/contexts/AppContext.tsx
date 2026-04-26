@@ -1,6 +1,6 @@
 "use client";
 
-import React, { createContext, useContext, useState, useEffect, useCallback, ReactNode } from "react";
+import React, { createContext, useContext, useState, useEffect, useCallback, useRef, ReactNode } from "react";
 import { Product, ProductFormData, Toast, DashboardStats } from "@/lib/types";
 import { generateId } from "@/lib/utils";
 
@@ -124,6 +124,21 @@ export function useApp() {
   return ctx;
 }
 
+// ===== Lazy Supabase singleton =====
+let _supabaseClient: ReturnType<typeof import("@supabase/ssr").createBrowserClient> | null = null;
+
+function getSupabase() {
+  if (!_supabaseClient) {
+    // eslint-disable-next-line @typescript-eslint/no-require-imports
+    const { createBrowserClient } = require("@supabase/ssr");
+    _supabaseClient = createBrowserClient(
+      process.env.NEXT_PUBLIC_SUPABASE_URL!,
+      process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
+    );
+  }
+  return _supabaseClient!;
+}
+
 // ===== PROVIDER =====
 export function AppProvider({ children }: { children: ReactNode }) {
   const isDemoMode = !isSupabaseConfigured();
@@ -132,34 +147,74 @@ export function AppProvider({ children }: { children: ReactNode }) {
   const [userEmail, setUserEmail] = useState<string | null>(null);
   const [products, setProducts] = useState<Product[]>([]);
   const [toasts, setToasts] = useState<Toast[]>([]);
+  const initDone = useRef(false);
 
-  // Check auth on mount
-  useEffect(() => {
+  // ===== Fetch products from Supabase (works for both auth'd and public) =====
+  const fetchProducts = useCallback(async () => {
     if (isDemoMode) {
+      setProducts(getStoredProducts());
+      return;
+    }
+    try {
+      const supabase = getSupabase();
+      const { data, error } = await supabase
+        .from("products")
+        .select("*")
+        .order("created_at", { ascending: false });
+      if (error) {
+        console.error("Failed to fetch products:", error.message);
+        return;
+      }
+      if (data) setProducts(data);
+    } catch (err) {
+      console.error("Products fetch error:", err);
+    }
+  }, [isDemoMode]);
+
+  // ===== Init: check auth + fetch products =====
+  useEffect(() => {
+    if (initDone.current) return;
+    initDone.current = true;
+
+    if (isDemoMode) {
+      // Demo mode init
       const auth = localStorage.getItem(AUTH_KEY);
       if (auth) {
-        const parsed = JSON.parse(auth);
-        setIsAuthenticated(true);
-        setUserEmail(parsed.email);
+        try {
+          const parsed = JSON.parse(auth);
+          setIsAuthenticated(true);
+          setUserEmail(parsed.email);
+        } catch { /* ignore */ }
       }
       setProducts(getStoredProducts());
       setIsLoading(false);
     } else {
-      // Supabase auth check
-      import("@/lib/supabase/client").then(({ createClient }) => {
-        const supabase = createClient();
-        supabase.auth.getSession().then(({ data: { session } }) => {
+      // Supabase init
+      const supabase = getSupabase();
+
+      // Check current session
+      supabase.auth.getSession().then(({ data: { session } }: { data: { session: { user: { email: string; id: string } } | null } }) => {
+        setIsAuthenticated(!!session);
+        setUserEmail(session?.user?.email ?? null);
+        setIsLoading(false);
+      });
+
+      // Listen for auth state changes (login/logout/token refresh)
+      const { data: { subscription } } = supabase.auth.onAuthStateChange(
+        (_event: string, session: { user: { email: string; id: string } } | null) => {
           setIsAuthenticated(!!session);
           setUserEmail(session?.user?.email ?? null);
-          setIsLoading(false);
-        });
-        // Fetch products
-        supabase.from("products").select("*").order("created_at", { ascending: false }).then(({ data }) => {
-          if (data) setProducts(data);
-        });
-      });
+        }
+      );
+
+      // Always fetch products (public read is allowed by RLS)
+      fetchProducts();
+
+      return () => {
+        subscription?.unsubscribe();
+      };
     }
-  }, [isDemoMode]);
+  }, [isDemoMode, fetchProducts]);
 
   // Toast
   const showToast = useCallback((message: string, type: "success" | "error") => {
@@ -178,7 +233,6 @@ export function AppProvider({ children }: { children: ReactNode }) {
   const login = useCallback(
     async (email: string, password: string): Promise<boolean> => {
       if (isDemoMode) {
-        // Demo mode: accept admin@company.com / admin123
         if ((email === "admin@company.com" && password === "admin123") ||
             (email === "admin2@company.com" && password === "admin123") ||
             (email === "admin3@company.com" && password === "admin123")) {
@@ -189,16 +243,25 @@ export function AppProvider({ children }: { children: ReactNode }) {
         }
         return false;
       } else {
-        const { createClient } = await import("@/lib/supabase/client");
-        const supabase = createClient();
-        const { error } = await supabase.auth.signInWithPassword({ email, password });
-        if (error) return false;
-        setIsAuthenticated(true);
-        setUserEmail(email);
-        return true;
+        try {
+          const supabase = getSupabase();
+          const { error } = await supabase.auth.signInWithPassword({ email, password });
+          if (error) {
+            console.error("Login error:", error.message);
+            return false;
+          }
+          setIsAuthenticated(true);
+          setUserEmail(email);
+          // Refresh products after login
+          fetchProducts();
+          return true;
+        } catch (err) {
+          console.error("Login failed:", err);
+          return false;
+        }
       }
     },
-    [isDemoMode]
+    [isDemoMode, fetchProducts]
   );
 
   // Logout
@@ -206,9 +269,12 @@ export function AppProvider({ children }: { children: ReactNode }) {
     if (isDemoMode) {
       localStorage.removeItem(AUTH_KEY);
     } else {
-      const { createClient } = await import("@/lib/supabase/client");
-      const supabase = createClient();
-      await supabase.auth.signOut();
+      try {
+        const supabase = getSupabase();
+        await supabase.auth.signOut();
+      } catch (err) {
+        console.error("Logout error:", err);
+      }
     }
     setIsAuthenticated(false);
     setUserEmail(null);
@@ -242,16 +308,20 @@ export function AppProvider({ children }: { children: ReactNode }) {
         saveProducts(updated);
         return newProduct;
       } else {
-        const { createClient } = await import("@/lib/supabase/client");
-        const supabase = createClient();
+        const supabase = getSupabase();
 
         // Upload PDF if provided
         if (manualFile) {
           const fileName = `${generateId()}-${manualFile.name}`;
-          const { data: uploadData } = await supabase.storage
+          const { data: uploadData, error: uploadError } = await supabase.storage
             .from("manuals")
-            .upload(fileName, manualFile);
-          if (uploadData) {
+            .upload(fileName, manualFile, {
+              cacheControl: "3600",
+              upsert: false,
+            });
+          if (uploadError) {
+            console.error("Manual upload failed:", uploadError.message);
+          } else if (uploadData) {
             const { data: urlData } = supabase.storage
               .from("manuals")
               .getPublicUrl(uploadData.path);
@@ -259,13 +329,33 @@ export function AppProvider({ children }: { children: ReactNode }) {
           }
         }
 
+        // Get current user ID for created_by
+        const { data: { user } } = await supabase.auth.getUser();
+
+        const insertData = {
+          name: data.name,
+          category: data.category,
+          gst_number: data.gst_number || "",
+          batch_number: data.batch_number || "",
+          serial_number: data.serial_number || "",
+          manufacture_date: data.manufacture_date || null,
+          expiry_date: data.expiry_date || null,
+          description: data.description || "",
+          additional_info: data.additional_info || {},
+          manual_url: manualUrl,
+          created_by: user?.id || null,
+        };
+
         const { data: newProduct, error } = await supabase
           .from("products")
-          .insert({ ...data, manual_url: manualUrl })
+          .insert(insertData)
           .select()
           .single();
 
-        if (error) throw error;
+        if (error) {
+          console.error("Create product error:", error.message);
+          throw new Error(error.message);
+        }
         setProducts((prev) => [newProduct, ...prev]);
         return newProduct;
       }
@@ -296,15 +386,19 @@ export function AppProvider({ children }: { children: ReactNode }) {
         saveProducts(updated);
         return updated.find((p) => p.id === id)!;
       } else {
-        const { createClient } = await import("@/lib/supabase/client");
-        const supabase = createClient();
+        const supabase = getSupabase();
 
         if (manualFile) {
           const fileName = `${generateId()}-${manualFile.name}`;
-          const { data: uploadData } = await supabase.storage
+          const { data: uploadData, error: uploadError } = await supabase.storage
             .from("manuals")
-            .upload(fileName, manualFile);
-          if (uploadData) {
+            .upload(fileName, manualFile, {
+              cacheControl: "3600",
+              upsert: false,
+            });
+          if (uploadError) {
+            console.error("Manual upload failed:", uploadError.message);
+          } else if (uploadData) {
             const { data: urlData } = supabase.storage
               .from("manuals")
               .getPublicUrl(uploadData.path);
@@ -312,7 +406,18 @@ export function AppProvider({ children }: { children: ReactNode }) {
           }
         }
 
-        const updateData: Record<string, unknown> = { ...data, updated_at: new Date().toISOString() };
+        const updateData: Record<string, unknown> = {
+          name: data.name,
+          category: data.category,
+          gst_number: data.gst_number || "",
+          batch_number: data.batch_number || "",
+          serial_number: data.serial_number || "",
+          manufacture_date: data.manufacture_date || null,
+          expiry_date: data.expiry_date || null,
+          description: data.description || "",
+          additional_info: data.additional_info || {},
+          updated_at: new Date().toISOString(),
+        };
         if (manualUrl) updateData.manual_url = manualUrl;
 
         const { data: updatedProduct, error } = await supabase
@@ -322,7 +427,10 @@ export function AppProvider({ children }: { children: ReactNode }) {
           .select()
           .single();
 
-        if (error) throw error;
+        if (error) {
+          console.error("Update product error:", error.message);
+          throw new Error(error.message);
+        }
         setProducts((prev) => prev.map((p) => (p.id === id ? updatedProduct : p)));
         return updatedProduct;
       }
@@ -338,10 +446,12 @@ export function AppProvider({ children }: { children: ReactNode }) {
         setProducts(updated);
         saveProducts(updated);
       } else {
-        const { createClient } = await import("@/lib/supabase/client");
-        const supabase = createClient();
+        const supabase = getSupabase();
         const { error } = await supabase.from("products").delete().eq("id", id);
-        if (error) throw error;
+        if (error) {
+          console.error("Delete product error:", error.message);
+          throw new Error(error.message);
+        }
         setProducts((prev) => prev.filter((p) => p.id !== id));
       }
     },
@@ -349,16 +459,9 @@ export function AppProvider({ children }: { children: ReactNode }) {
   );
 
   // Refresh
-  const refreshProducts = useCallback(async () => {
-    if (isDemoMode) {
-      setProducts(getStoredProducts());
-    } else {
-      const { createClient } = await import("@/lib/supabase/client");
-      const supabase = createClient();
-      const { data } = await supabase.from("products").select("*").order("created_at", { ascending: false });
-      if (data) setProducts(data);
-    }
-  }, [isDemoMode]);
+  const refreshProducts = useCallback(() => {
+    fetchProducts();
+  }, [fetchProducts]);
 
   // Stats
   const getStats = useCallback((): DashboardStats => {
