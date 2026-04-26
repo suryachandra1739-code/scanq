@@ -3,22 +3,57 @@
 import { useEffect, useState } from "react";
 import { useParams } from "next/navigation";
 import { motion } from "framer-motion";
-import { useApp } from "@/contexts/AppContext";
 import { formatDate, isExpired, isExpiringSoon } from "@/lib/utils";
 import type { Product } from "@/lib/types";
+
+// Direct fetch — doesn't depend on AppContext products array
+async function fetchProductById(id: string): Promise<Product | null> {
+  const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL;
+  const isDemoMode = !supabaseUrl || supabaseUrl === "your_supabase_project_url" || !supabaseUrl.startsWith("https://");
+
+  if (isDemoMode) {
+    // Demo mode: read from localStorage
+    if (typeof window === "undefined") return null;
+    const stored = localStorage.getItem("qr_products");
+    if (!stored) return null;
+    try {
+      const products: Product[] = JSON.parse(stored);
+      return products.find((p) => p.id === id) ?? null;
+    } catch {
+      return null;
+    }
+  } else {
+    // Production: fetch directly from Supabase REST API
+    try {
+      const anonKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!;
+      const res = await fetch(
+        `${supabaseUrl}/rest/v1/products?id=eq.${encodeURIComponent(id)}&select=*`,
+        {
+          headers: {
+            apikey: anonKey,
+            Authorization: `Bearer ${anonKey}`,
+          },
+          cache: "no-store",
+        }
+      );
+      if (!res.ok) return null;
+      const data = await res.json();
+      return data.length > 0 ? data[0] : null;
+    } catch (err) {
+      console.error("Failed to fetch product:", err);
+      return null;
+    }
+  }
+}
 
 export default function PublicProductPage() {
   const params = useParams();
   const productId = params.id as string;
-  const { getProduct, isLoading: appLoading } = useApp();
   const [product, setProduct] = useState<Product | null | undefined>(undefined);
 
   useEffect(() => {
-    if (!appLoading) {
-      const p = getProduct(productId);
-      setProduct(p ?? null);
-    }
-  }, [appLoading, productId, getProduct]);
+    fetchProductById(productId).then((p) => setProduct(p));
+  }, [productId]);
 
   // Loading state
   if (product === undefined) {
