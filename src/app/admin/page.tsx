@@ -15,45 +15,36 @@ export default function DashboardPage() {
       label: "Total Products",
       value: stats.totalProducts,
       icon: (
-        <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
           <path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z" />
         </svg>
       ),
-      color: "accent",
-      gradient: "linear-gradient(135deg, rgba(27,79,114,0.06), rgba(27,79,114,0.02))",
-      borderColor: "rgba(27,79,114,0.12)",
     },
     {
       label: "Added This Week",
       value: stats.recentlyAdded,
       icon: (
-        <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
           <polyline points="23 6 13.5 15.5 8.5 10.5 1 18" />
           <polyline points="17 6 23 6 23 12" />
         </svg>
       ),
-      color: "success",
-      gradient: "linear-gradient(135deg, rgba(21,128,61,0.06), rgba(21,128,61,0.02))",
-      borderColor: "rgba(21,128,61,0.12)",
     },
     {
       label: "Expiring Soon",
       value: stats.expiringSoon,
       icon: (
-        <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
           <circle cx="12" cy="12" r="10" />
           <polyline points="12 6 12 12 16 14" />
         </svg>
       ),
-      color: "warning",
-      gradient: "linear-gradient(135deg, rgba(202,138,4,0.06), rgba(202,138,4,0.02))",
-      borderColor: "rgba(202,138,4,0.12)",
     },
     {
       label: "Categories",
       value: stats.categories,
       icon: (
-        <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
           <line x1="8" y1="6" x2="21" y2="6" />
           <line x1="8" y1="12" x2="21" y2="12" />
           <line x1="8" y1="18" x2="21" y2="18" />
@@ -62,9 +53,6 @@ export default function DashboardPage() {
           <line x1="3" y1="18" x2="3.01" y2="18" />
         </svg>
       ),
-      color: "accent-2",
-      gradient: "linear-gradient(135deg, rgba(184,134,11,0.06), rgba(184,134,11,0.02))",
-      borderColor: "rgba(184,134,11,0.12)",
     },
   ];
 
@@ -80,10 +68,9 @@ export default function DashboardPage() {
 
   return (
     <div>
-      {/* Header */}
-      <div className="mb-8">
-        <h1 className="text-2xl font-bold mb-1">Dashboard</h1>
-        <p className="text-muted text-sm">Overview of your product traceability system</p>
+      <div className="mb-6">
+        <h1 style={{ fontSize: "20px", fontWeight: 500 }} className="mb-1">Dashboard</h1>
+        <p style={{ fontSize: "12px", color: "var(--color-muted)" }}>Overview of your product traceability system</p>
       </div>
 
       {/* Stats Grid */}
@@ -91,22 +78,22 @@ export default function DashboardPage() {
         variants={containerVariants}
         initial="hidden"
         animate="show"
-        className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 mb-8"
+        className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3 mb-6"
       >
         {statCards.map((card) => (
           <motion.div
             key={card.label}
             variants={itemVariants}
             className="stat-card"
-            style={{ background: card.gradient, borderColor: card.borderColor }}
           >
-            <div className="flex items-start justify-between mb-4">
-              <div className={`p-2.5 rounded-xl text-${card.color}`} style={{ background: `${card.gradient}` }}>
+            <div className="flex items-start justify-between mb-3">
+              <div className="w-7 h-7 rounded-lg flex items-center justify-center"
+                style={{ background: "var(--color-surface-3)", color: "var(--color-foreground)" }}>
                 {card.icon}
               </div>
             </div>
-            <div className="text-3xl font-bold mb-1">{card.value}</div>
-            <div className="text-sm text-muted">{card.label}</div>
+            <div style={{ fontSize: "24px", fontWeight: 500, color: "var(--color-foreground)" }} className="mb-0.5">{card.value}</div>
+            <div style={{ fontSize: "11px", color: "var(--color-muted)" }}>{card.label}</div>
           </motion.div>
         ))}
       </motion.div>

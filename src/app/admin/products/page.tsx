@@ -41,14 +41,13 @@ export default function ProductListPage() {
 
   return (
     <div>
-      {/* Header */}
-      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 mb-6 sm:mb-8">
+      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 mb-6">
         <div>
-          <h1 className="text-2xl font-bold mb-1">Products</h1>
-          <p className="text-muted text-sm">{products.length} products registered</p>
+          <h1 style={{ fontSize: "20px", fontWeight: 500 }} className="mb-0.5">Products</h1>
+          <p style={{ fontSize: "12px", color: "var(--color-muted)" }}>{products.length} products registered</p>
         </div>
         <Link href="/admin/products/new" className="btn-primary no-underline">
-          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
             <line x1="12" y1="5" x2="12" y2="19" />
             <line x1="5" y1="12" x2="19" y2="12" />
           </svg>
@@ -59,7 +58,7 @@ export default function ProductListPage() {
       {/* Filters */}
       <div className="flex flex-wrap gap-3 mb-6">
         <div className="relative flex-1 min-w-[240px]">
-          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="absolute left-4 top-1/2 -translate-y-1/2 text-muted">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="absolute left-3 top-1/2 -translate-y-1/2" style={{ color: "var(--color-tertiary)" }}>
             <circle cx="11" cy="11" r="8" />
             <line x1="21" y1="21" x2="16.65" y2="16.65" />
           </svg>
@@ -68,7 +67,7 @@ export default function ProductListPage() {
             placeholder="Search products, batch no, serial no..."
             value={search}
             onChange={(e) => setSearch(e.target.value)}
-            className="input-field pl-11"
+            className="input-field pl-9"
           />
         </div>
         <select

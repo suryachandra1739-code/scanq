@@ -7,10 +7,11 @@ const inter = Inter({
   variable: "--font-inter",
   subsets: ["latin"],
   display: "swap",
+  weight: ["400", "500"],
 });
 
 export const metadata: Metadata = {
-  title: "Company — Product Traceability",
+  title: "ScanQ — Product Traceability",
   description: "Scan QR codes to verify and trace product information, view manufacturing details, and download product manuals.",
   keywords: ["product traceability", "QR code", "product verification", "manufacturing"],
 };
@@ -21,8 +22,8 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="en" className={`${inter.variable} h-full`} data-theme="light" style={{ colorScheme: "light" }}>
-      <body className="min-h-full flex flex-col antialiased" style={{ fontFamily: "var(--font-inter), system-ui, sans-serif" }}>
+    <html lang="en" className={`${inter.variable} h-full`}>
+      <body className="min-h-full flex flex-col" style={{ fontFamily: "var(--font-inter), system-ui, sans-serif" }}>
         <AppProvider>
           <div className="mesh-bg" />
           {children}

@@ -146,7 +146,7 @@ export default function ProductDetailPage() {
         <div className="flex flex-col sm:flex-row sm:items-start sm:justify-between gap-4">
           <div>
             <div className="flex flex-wrap items-center gap-2 mb-1">
-              <h1 className="text-xl sm:text-2xl font-bold">{product.name}</h1>
+              <h1 style={{ fontSize: "20px", fontWeight: 500 }}>{product.name}</h1>
               {isExpired(product.expiry_date) ? (
                 <span className="badge badge-danger">Expired</span>
               ) : isExpiringSoon(product.expiry_date) ? (
@@ -155,7 +155,7 @@ export default function ProductDetailPage() {
                 <span className="badge badge-success">Active</span>
               )}
             </div>
-            <p className="text-muted text-sm">{product.category} · Added {formatDate(product.created_at)}</p>
+            <p style={{ fontSize: "12px", color: "var(--color-muted)" }}>{product.category} · Added {formatDate(product.created_at)}</p>
           </div>
           <div className="flex gap-2 shrink-0">
             {!editing && activeTab === "details" && (
@@ -179,20 +179,34 @@ export default function ProductDetailPage() {
       </div>
 
       {/* Tabs */}
-      <div className="flex gap-1 mb-6 p-1 rounded-xl bg-surface w-fit">
+      <div className="flex gap-0 mb-6" style={{ borderBottom: "1px solid var(--color-border)" }}>
         <button
           onClick={() => setActiveTab("details")}
-          className={`px-5 py-2.5 rounded-lg text-sm font-medium transition-all ${
-            activeTab === "details" ? "bg-surface-3 text-foreground" : "text-muted hover:text-foreground"
-          }`}
+          className="transition-all"
+          style={{
+            padding: "8px 16px",
+            fontSize: "13px",
+            fontWeight: 500,
+            color: activeTab === "details" ? "var(--color-foreground)" : "var(--color-muted)",
+            borderBottom: activeTab === "details" ? "2px solid var(--color-foreground)" : "2px solid transparent",
+            background: "none",
+            cursor: "pointer",
+          }}
         >
           Product Details
         </button>
         <button
           onClick={() => setActiveTab("qr")}
-          className={`px-5 py-2.5 rounded-lg text-sm font-medium transition-all ${
-            activeTab === "qr" ? "bg-surface-3 text-foreground" : "text-muted hover:text-foreground"
-          }`}
+          className="transition-all"
+          style={{
+            padding: "8px 16px",
+            fontSize: "13px",
+            fontWeight: 500,
+            color: activeTab === "qr" ? "var(--color-foreground)" : "var(--color-muted)",
+            borderBottom: activeTab === "qr" ? "2px solid var(--color-foreground)" : "2px solid transparent",
+            background: "none",
+            cursor: "pointer",
+          }}
         >
           QR Code
         </button>
