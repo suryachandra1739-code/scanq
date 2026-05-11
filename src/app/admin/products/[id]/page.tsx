@@ -143,10 +143,10 @@ export default function ProductDetailPage() {
           Back to Products
         </button>
 
-        <div className="flex items-start justify-between">
+        <div className="flex flex-col sm:flex-row sm:items-start sm:justify-between gap-4">
           <div>
-            <div className="flex items-center gap-3 mb-1">
-              <h1 className="text-2xl font-bold">{product.name}</h1>
+            <div className="flex flex-wrap items-center gap-2 mb-1">
+              <h1 className="text-xl sm:text-2xl font-bold">{product.name}</h1>
               {isExpired(product.expiry_date) ? (
                 <span className="badge badge-danger">Expired</span>
               ) : isExpiringSoon(product.expiry_date) ? (
@@ -157,7 +157,7 @@ export default function ProductDetailPage() {
             </div>
             <p className="text-muted text-sm">{product.category} · Added {formatDate(product.created_at)}</p>
           </div>
-          <div className="flex gap-2">
+          <div className="flex gap-2 shrink-0">
             {!editing && activeTab === "details" && (
               <button onClick={() => setEditing(true)} className="btn-secondary">
                 <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
@@ -338,15 +338,15 @@ export default function ProductDetailPage() {
                 transition={{ duration: 0.4, ease: [0.16, 1, 0.3, 1] }}
                 className="inline-block"
               >
-                <div className="bg-white p-6 rounded-2xl inline-block mb-6 shadow-lg shadow-black/20">
-                  <img src={qrDataUrl} alt="QR Code" className="w-64 h-64" />
+                <div className="bg-white p-4 sm:p-6 rounded-2xl inline-block mb-6 shadow-lg shadow-black/20">
+                  <img src={qrDataUrl} alt="QR Code" className="w-48 h-48 sm:w-64 sm:h-64" />
                 </div>
               </motion.div>
             )}
 
             <div className="mb-6">
               <p className="text-xs text-muted mb-2">This QR code points to:</p>
-              <div className="inline-flex items-center gap-2 px-4 py-2 rounded-xl bg-surface text-sm font-mono text-accent">
+              <div className="inline-flex items-center gap-2 px-3 py-2 rounded-xl bg-surface text-xs sm:text-sm font-mono text-accent max-w-full overflow-x-auto">
                 {productUrl}
                 <button
                   onClick={() => { navigator.clipboard.writeText(productUrl); showToast("URL copied!", "success"); }}
@@ -359,7 +359,7 @@ export default function ProductDetailPage() {
               </div>
             </div>
 
-            <div className="flex items-center justify-center gap-3">
+            <div className="flex flex-wrap items-center justify-center gap-2 sm:gap-3">
               <button onClick={() => downloadQR("png")} className="btn-primary">
                 <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
                   <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4" /><polyline points="7 10 12 15 17 10" /><line x1="12" y1="15" x2="12" y2="3" />

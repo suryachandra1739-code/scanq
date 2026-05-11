@@ -42,7 +42,7 @@ export default function ProductListPage() {
   return (
     <div>
       {/* Header */}
-      <div className="flex items-center justify-between mb-8">
+      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 mb-6 sm:mb-8">
         <div>
           <h1 className="text-2xl font-bold mb-1">Products</h1>
           <p className="text-muted text-sm">{products.length} products registered</p>
@@ -84,7 +84,7 @@ export default function ProductListPage() {
       </div>
 
       {/* Table */}
-      <div className="glass-card overflow-hidden">
+      <div className="glass-card overflow-x-auto">
         {filtered.length === 0 ? (
           <div className="p-16 text-center">
             <div className="text-muted mb-4">
@@ -99,7 +99,7 @@ export default function ProductListPage() {
           </div>
         ) : (
           <div className="overflow-x-auto">
-            <table className="data-table">
+            <table className="data-table min-w-[700px]">
               <thead>
                 <tr>
                   <th>Product Name</th>
