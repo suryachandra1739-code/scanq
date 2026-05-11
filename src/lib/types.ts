@@ -1,5 +1,6 @@
 export interface Product {
   id: string;
+  short_code: string;
   name: string;
   category: string;
   gst_number: string;

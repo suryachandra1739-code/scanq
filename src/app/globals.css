@@ -57,6 +57,7 @@
 
 html {
   scroll-behavior: smooth;
+  color-scheme: light;
 }
 
 body {
@@ -71,32 +72,7 @@ body {
   -moz-osx-font-smoothing: grayscale;
 }
 
-/* ===== DARK MODE — device-driven ===== */
-
-@media (prefers-color-scheme: dark) {
-  :root {
-    --color-base: #1C1C1E;
-    --color-background: #1C1C1E;
-    --color-foreground: #F2F2F2;
-    --color-surface: #232325;
-    --color-surface-2: #2C2C2E;
-    --color-surface-3: #38383A;
-    --color-border: #3A3A3C;
-    --color-muted: #A0A0A5;
-    --color-tertiary: #6C6C70;
-    --color-accent: #F2F2F2;
-    --color-dot: #2E2E2E;
-    --color-success: #3DAD7F;
-    --color-warning: #CA8A04;
-    --color-danger: #EF4444;
-    --color-danger-bg: rgba(239, 68, 68, 0.1);
-  }
-
-  body {
-    background-color: var(--color-base);
-    color: var(--color-foreground);
-  }
-}
+/* Dark mode removed — light only */
 
 /* ===== DOT GRID BACKGROUND ===== */
 

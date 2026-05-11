@@ -25,6 +25,15 @@ export function generateId(): string {
   return crypto.randomUUID();
 }
 
+export function generateShortCode(): string {
+  const chars = 'ABCDEFGHJKLMNPQRSTUVWXYZabcdefghjkmnpqrstuvwxyz23456789';
+  let code = '';
+  for (let i = 0; i < 8; i++) {
+    code += chars.charAt(Math.floor(Math.random() * chars.length));
+  }
+  return code;
+}
+
 export function truncate(str: string, length: number): string {
   if (!str) return "";
   if (str.length <= length) return str;
@@ -38,8 +47,8 @@ export function getBaseUrl(): string {
   return "http://localhost:3000";
 }
 
-export function getProductUrl(productId: string): string {
-  return `${getBaseUrl()}/product/${productId}`;
+export function getProductUrl(shortCode: string): string {
+  return `${getBaseUrl()}/p/${shortCode}`;
 }
 
 export const PRODUCT_CATEGORIES = [

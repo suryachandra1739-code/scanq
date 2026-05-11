@@ -6,6 +6,7 @@
 -- 1. Create products table
 CREATE TABLE IF NOT EXISTS products (
   id UUID DEFAULT gen_random_uuid() PRIMARY KEY,
+  short_code TEXT NOT NULL UNIQUE,
   name TEXT NOT NULL,
   category TEXT NOT NULL,
   gst_number TEXT DEFAULT '',
