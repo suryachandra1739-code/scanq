@@ -110,21 +110,70 @@ export default function ProductDetailPage() {
     }
   };
 
-  const downloadQR = (format: "png" | "svg") => {
+  const downloadQR = async (format: "png" | "svg") => {
     if (format === "png" && qrDataUrl) {
+      const canvas = document.createElement("canvas");
+      const ctx = canvas.getContext("2d");
+      if (!ctx) return;
+      
+      const img = new window.Image();
+      img.src = qrDataUrl;
+      await new Promise((resolve) => { img.onload = resolve; });
+      
+      const width = img.width;
+      const height = img.height;
+      const bottomPadding = 80;
+      
+      canvas.width = width;
+      canvas.height = height + bottomPadding;
+      
+      // White background
+      ctx.fillStyle = "#ffffff";
+      ctx.fillRect(0, 0, canvas.width, canvas.height);
+      
+      // Draw QR Code
+      ctx.drawImage(img, 0, 0);
+      
+      // Draw text
+      ctx.fillStyle = "#1C1C1E";
+      ctx.textAlign = "center";
+      
+      ctx.font = "bold 24px system-ui, -apple-system, sans-serif";
+      ctx.fillText(product.name, width / 2, height + 30);
+      
+      ctx.font = "16px system-ui, -apple-system, sans-serif";
+      ctx.fillStyle = "#666666";
+      ctx.fillText("Scan to verify product", width / 2, height + 60);
+      
       const link = document.createElement("a");
-      link.href = qrDataUrl;
+      link.href = canvas.toDataURL("image/png");
       link.download = `${product.name.replace(/\s+/g, "_")}_QR.png`;
       link.click();
     } else if (format === "svg") {
       const url = getProductUrl(productId);
       QRCode.toString(url, { type: "svg", margin: 2, errorCorrectionLevel: "H" }, (err, svg) => {
         if (err || !svg) return;
-        const blob = new Blob([svg], { type: "image/svg+xml" });
-        const link = document.createElement("a");
-        link.href = URL.createObjectURL(blob);
-        link.download = `${product.name.replace(/\s+/g, "_")}_QR.svg`;
-        link.click();
+        
+        // Extend viewBox to add text at the bottom
+        const viewBoxMatch = svg.match(/viewBox="0 0 (\d+) (\d+)"/);
+        if (viewBoxMatch) {
+          const w = parseInt(viewBoxMatch[1], 10);
+          const h = parseInt(viewBoxMatch[2], 10);
+          const textHeight = Math.ceil(h * 0.15); // Add 15% height for text
+          
+          const newSvg = svg
+            .replace(`viewBox="0 0 ${w} ${h}"`, `viewBox="0 0 ${w} ${h + textHeight}"`)
+            .replace('</svg>', `
+              <text x="${w/2}" y="${h + textHeight * 0.4}" font-family="system-ui, sans-serif" font-weight="bold" font-size="${w * 0.05}" text-anchor="middle" fill="#1C1C1E">${product.name.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;')}</text>
+              <text x="${w/2}" y="${h + textHeight * 0.8}" font-family="system-ui, sans-serif" font-size="${w * 0.035}" text-anchor="middle" fill="#666666">Scan to verify product</text>
+            </svg>`);
+            
+          const blob = new Blob([newSvg], { type: "image/svg+xml" });
+          const link = document.createElement("a");
+          link.href = URL.createObjectURL(blob);
+          link.download = `${product.name.replace(/\s+/g, "_")}_QR.svg`;
+          link.click();
+        }
       });
     }
     showToast(`QR code downloaded as ${format.toUpperCase()}`, "success");
