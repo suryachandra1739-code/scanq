@@ -89,8 +89,14 @@ export default function PublicProductPage() {
   const expiringSoon = isExpiringSoon(product.expiry_date);
 
   return (
-    <div className="min-h-screen">
-      <div className="max-w-lg mx-auto px-4 py-8">
+    <div className="min-h-screen relative overflow-hidden">
+      {/* Ambient background glows */}
+      <div className="absolute top-[-10%] left-[-10%] w-[50%] h-[50%] rounded-full opacity-[0.15] blur-[100px] pointer-events-none" 
+           style={{ background: "radial-gradient(circle, #3b82f6 0%, transparent 70%)" }} />
+      <div className="absolute bottom-[-10%] right-[-10%] w-[50%] h-[50%] rounded-full opacity-[0.1] blur-[100px] pointer-events-none" 
+           style={{ background: "radial-gradient(circle, #10b981 0%, transparent 70%)" }} />
+
+      <div className="max-w-lg mx-auto px-4 py-8 relative z-10">
         {/* Header */}
         <motion.div initial={{ opacity: 0, y: 12 }} animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.3 }}>

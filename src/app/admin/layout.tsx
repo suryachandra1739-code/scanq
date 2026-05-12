@@ -122,6 +122,7 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
       `} style={{
         background: "var(--color-surface)",
         borderRight: "1px solid var(--color-border)",
+        boxShadow: "1px 0 10px rgba(0,0,0,0.01)",
       }}>
         {/* Logo */}
         <div className="px-4 py-4" style={{ borderBottom: "1px solid var(--color-border)" }}>
@@ -194,8 +195,12 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
       </aside>
 
       {/* Main panel — Level 1 surface, floats on dot grid */}
-      <main className="flex-1 lg:ml-56 pt-12 lg:pt-0">
-        <div className="min-h-screen">
+      <main className="flex-1 lg:ml-56 pt-12 lg:pt-0 relative overflow-hidden">
+        {/* Ambient glows for admin */}
+        <div className="absolute top-[-10%] right-[-10%] w-[40%] h-[40%] rounded-full opacity-[0.12] blur-[100px] pointer-events-none" 
+             style={{ background: "radial-gradient(circle, #f59e0b 0%, transparent 70%)" }} />
+             
+        <div className="min-h-screen relative z-10">
           <div className="p-4 sm:p-6 lg:p-8 max-w-[1100px]">
             <AnimatePresence mode="wait">
               <motion.div
