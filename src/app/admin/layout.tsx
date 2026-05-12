@@ -195,7 +195,7 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
 
       {/* Main panel — Level 1 surface, floats on dot grid */}
       <main className="flex-1 lg:ml-56 pt-12 lg:pt-0">
-        <div className="min-h-screen" style={{ background: "var(--color-surface)" }}>
+        <div className="min-h-screen">
           <div className="p-4 sm:p-6 lg:p-8 max-w-[1100px]">
             <AnimatePresence mode="wait">
               <motion.div

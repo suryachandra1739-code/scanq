@@ -56,7 +56,7 @@ export default function PublicProductPage() {
   // Loading
   if (product === undefined) {
     return (
-      <div className="min-h-screen flex items-center justify-center" style={{ background: "var(--color-base)" }}>
+      <div className="min-h-screen flex items-center justify-center">
         <div className="text-center">
           <div className="w-6 h-6 border-2 rounded-full animate-spin mx-auto mb-3"
             style={{ borderColor: "var(--color-border)", borderTopColor: "transparent" }} />
@@ -69,7 +69,7 @@ export default function PublicProductPage() {
   // Not found
   if (!product) {
     return (
-      <div className="min-h-screen flex items-center justify-center px-4" style={{ background: "var(--color-base)" }}>
+      <div className="min-h-screen flex items-center justify-center px-4">
         <div className="text-center">
           <div className="w-12 h-12 rounded-xl flex items-center justify-center mx-auto mb-4"
             style={{ background: "var(--color-surface-2)", border: "1px solid var(--color-border)" }}>
@@ -89,7 +89,7 @@ export default function PublicProductPage() {
   const expiringSoon = isExpiringSoon(product.expiry_date);
 
   return (
-    <div className="min-h-screen" style={{ background: "var(--color-base)" }}>
+    <div className="min-h-screen">
       <div className="max-w-lg mx-auto px-4 py-8">
         {/* Header */}
         <motion.div initial={{ opacity: 0, y: 12 }} animate={{ opacity: 1, y: 0 }}

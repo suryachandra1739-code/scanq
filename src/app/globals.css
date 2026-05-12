@@ -2,17 +2,17 @@
 
 /* ===== DESIGN TOKENS — Light Mode ===== */
 @theme inline {
-  --color-base: #FAF8F4;
-  --color-background: #FAF8F4;
+  --color-base: #FFFFFF;
+  --color-background: #FFFFFF;
   --color-foreground: #111110;
   --color-surface: #FFFFFF;
-  --color-surface-2: #F5F3EE;
-  --color-surface-3: #ECEAE4;
-  --color-border: #E0DDD6;
+  --color-surface-2: #F9F9F9;
+  --color-surface-3: #F0F0F0;
+  --color-border: #E5E5E5;
   --color-muted: #78746D;
   --color-tertiary: #A8A39B;
   --color-accent: #111110;
-  --color-dot: #D4CFC7;
+  --color-dot: rgba(0, 0, 0, 0.05); /* Extremely subtle dots */
   --color-success: #3DAD7F;
   --color-warning: #CA8A04;
   --color-danger: #DC2626;
@@ -29,28 +29,59 @@
 }
 
 @keyframes fadeIn {
-  from { opacity: 0; }
-  to { opacity: 1; }
+  from {
+    opacity: 0;
+  }
+
+  to {
+    opacity: 1;
+  }
 }
 
 @keyframes slideUp {
-  from { opacity: 0; transform: translateY(12px); }
-  to { opacity: 1; transform: translateY(0); }
+  from {
+    opacity: 0;
+    transform: translateY(12px);
+  }
+
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
 }
 
 @keyframes slideInRight {
-  from { opacity: 0; transform: translateX(16px); }
-  to { opacity: 1; transform: translateX(0); }
+  from {
+    opacity: 0;
+    transform: translateX(16px);
+  }
+
+  to {
+    opacity: 1;
+    transform: translateX(0);
+  }
 }
 
 @keyframes scaleIn {
-  from { opacity: 0; transform: scale(0.97); }
-  to { opacity: 1; transform: scale(1); }
+  from {
+    opacity: 0;
+    transform: scale(0.97);
+  }
+
+  to {
+    opacity: 1;
+    transform: scale(1);
+  }
 }
 
 @keyframes shimmer {
-  0% { background-position: -200% 0; }
-  100% { background-position: 200% 0; }
+  0% {
+    background-position: -200% 0;
+  }
+
+  100% {
+    background-position: 200% 0;
+  }
 }
 
 /* ===== BASE ===== */
@@ -62,6 +93,8 @@ html {
 
 body {
   background-color: var(--color-base);
+  background-image: radial-gradient(circle, var(--color-dot) 1.2px, transparent 1.2px);
+  background-size: 22px 22px;
   color: var(--color-foreground);
   font-family: var(--font-sans);
   font-size: 13px;
@@ -72,17 +105,9 @@ body {
   -moz-osx-font-smoothing: grayscale;
 }
 
-/* Dark mode removed — light only */
-
-/* ===== DOT GRID BACKGROUND ===== */
-
+/* .mesh-bg kept as fallback overlay — not strictly needed now */
 .mesh-bg {
-  position: fixed;
-  inset: 0;
-  z-index: -1;
-  background-color: var(--color-base);
-  background-image: radial-gradient(circle, var(--color-dot) 1.5px, transparent 1.5px);
-  background-size: 24px 24px;
+  display: none;
 }
 
 /* ===== SCROLLBAR ===== */
@@ -505,7 +530,7 @@ body {
 /* ===== STAT CARD ===== */
 
 .stat-card {
-  background: var(--color-surface-2);
+  background: var(--color-surface);
   border: 1px solid var(--color-border);
   border-radius: 12px;
   padding: 16px;
