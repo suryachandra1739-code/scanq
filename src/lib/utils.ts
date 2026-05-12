@@ -34,6 +34,44 @@ export function generateShortCode(): string {
   return code;
 }
 
+const BASE62_CHARSET = "0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz";
+
+export function encodeUuid(uuid: string): string {
+  if (!uuid || !uuid.includes('-')) return uuid; // Fallback if not a standard UUID
+  try {
+    const hex = uuid.replace(/-/g, "");
+    let num = BigInt("0x" + hex);
+    let base62 = "";
+    if (num === BigInt(0)) return "0";
+    while (num > BigInt(0)) {
+      const rem = num % BigInt(62);
+      base62 = BASE62_CHARSET[Number(rem)] + base62;
+      num = num / BigInt(62);
+    }
+    return base62;
+  } catch (e) {
+    return uuid;
+  }
+}
+
+export function decodeUuid(code: string): string {
+  if (code.includes('-')) return code; // Already a UUID
+  try {
+    let num = BigInt(0);
+    for (let i = 0; i < code.length; i++) {
+      const char = code[i];
+      const val = BigInt(BASE62_CHARSET.indexOf(char));
+      if (val < BigInt(0)) return code; // Invalid char
+      num = num * BigInt(62) + val;
+    }
+    let hex = num.toString(16);
+    hex = hex.padStart(32, "0");
+    return `${hex.slice(0, 8)}-${hex.slice(8, 12)}-${hex.slice(12, 16)}-${hex.slice(16, 20)}-${hex.slice(20)}`;
+  } catch (e) {
+    return code;
+  }
+}
+
 export function truncate(str: string, length: number): string {
   if (!str) return "";
   if (str.length <= length) return str;
@@ -48,7 +86,7 @@ export function getBaseUrl(): string {
 }
 
 export function getProductUrl(productId: string): string {
-  return `${getBaseUrl()}/product/${productId}`;
+  return `${getBaseUrl()}/p/${encodeUuid(productId)}`;
 }
 
 export const PRODUCT_CATEGORIES = [

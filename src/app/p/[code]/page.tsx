@@ -3,7 +3,7 @@
 import { useEffect, useState } from "react";
 import { useParams } from "next/navigation";
 import { motion } from "framer-motion";
-import { formatDate, isExpired, isExpiringSoon } from "@/lib/utils";
+import { formatDate, isExpired, isExpiringSoon, decodeUuid } from "@/lib/utils";
 import type { Product } from "@/lib/types";
 
 // Direct fetch by short_code — no AppContext dependency
@@ -17,15 +17,17 @@ async function fetchProductByCode(code: string): Promise<Product | null> {
     if (!stored) return null;
     try {
       const products: Product[] = JSON.parse(stored);
-      return products.find((p) => p.short_code === code) ?? null;
+      const uuid = decodeUuid(code);
+      return products.find((p) => p.id === uuid) ?? null;
     } catch {
       return null;
     }
   } else {
     try {
       const anonKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!;
+      const uuid = decodeUuid(code);
       const res = await fetch(
-        `${supabaseUrl}/rest/v1/products?short_code=eq.${encodeURIComponent(code)}&select=*`,
+        `${supabaseUrl}/rest/v1/products?id=eq.${encodeURIComponent(uuid)}&select=*`,
         {
           headers: {
             apikey: anonKey,
