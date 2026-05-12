@@ -86,7 +86,8 @@ export default function DashboardPage() {
           <motion.div
             key={card.label}
             variants={itemVariants}
-            className="stat-card"
+            className="stat-card cursor-pointer"
+            onClick={() => router.push('/admin/products')}
           >
             <div className="flex items-start justify-between mb-3">
               <div className="w-7 h-7 rounded-lg flex items-center justify-center"
