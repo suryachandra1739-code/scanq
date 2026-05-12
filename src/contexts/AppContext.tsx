@@ -57,6 +57,7 @@ const DEMO_PRODUCTS: Product[] = [
     manual_url: null,
     additional_info: { "Active Ingredient": "Metsulfuron-methyl 20% WP", "Target Weeds": "Broad-leaved weeds" },
     created_by: "demo-admin",
+    created_at: new Date(Date.now() - 86400000).toISOString(),
     updated_at: new Date(Date.now() - 86400000).toISOString(),
   },
   {
