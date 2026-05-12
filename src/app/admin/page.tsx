@@ -1,11 +1,13 @@
 "use client";
 
 import Link from "next/link";
+import { useRouter } from "next/navigation";
 import { motion } from "framer-motion";
 import { useApp } from "@/contexts/AppContext";
 import { formatDate, isExpiringSoon, isExpired } from "@/lib/utils";
 
 export default function DashboardPage() {
+  const router = useRouter();
   const { products, getStats } = useApp();
   const stats = getStats();
   const recentProducts = products.slice(0, 5);
@@ -157,7 +159,7 @@ export default function DashboardPage() {
               </thead>
               <tbody>
                 {recentProducts.map((product) => (
-                  <tr key={product.id} onClick={() => window.location.href = `/admin/products/${product.id}`} className="cursor-pointer">
+                  <tr key={product.id} onClick={() => router.push(`/admin/products/${product.id}`)} className="cursor-pointer">
                     <td>
                       <span className="text-foreground font-medium">
                         {product.name}

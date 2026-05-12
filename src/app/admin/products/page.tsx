@@ -2,11 +2,13 @@
 
 import { useState, useMemo } from "react";
 import Link from "next/link";
+import { useRouter } from "next/navigation";
 import { motion } from "framer-motion";
 import { useApp } from "@/contexts/AppContext";
 import { formatDate, isExpired, isExpiringSoon, truncate, getProductUrl } from "@/lib/utils";
 
 export default function ProductListPage() {
+  const router = useRouter();
   const { products, deleteProduct, showToast } = useApp();
   const [search, setSearch] = useState("");
   const [categoryFilter, setCategoryFilter] = useState("all");
@@ -117,7 +119,7 @@ export default function ProductListPage() {
                     initial={{ opacity: 0, y: 10 }}
                     animate={{ opacity: 1, y: 0 }}
                     transition={{ delay: index * 0.03, duration: 0.3 }}
-                    onClick={() => window.location.href = `/admin/products/${product.id}`}
+                    onClick={() => router.push(`/admin/products/${product.id}`)}
                     className="cursor-pointer"
                   >
                     <td>
