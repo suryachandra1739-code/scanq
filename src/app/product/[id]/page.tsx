@@ -12,7 +12,6 @@ async function fetchProductById(id: string): Promise<Product | null> {
   const isDemoMode = !supabaseUrl || supabaseUrl === "your_supabase_project_url" || !supabaseUrl.startsWith("https://");
 
   if (isDemoMode) {
-    // Demo mode: read from localStorage
     if (typeof window === "undefined") return null;
     const stored = localStorage.getItem("qr_products");
     if (!stored) return null;
@@ -23,7 +22,6 @@ async function fetchProductById(id: string): Promise<Product | null> {
       return null;
     }
   } else {
-    // Production: fetch directly from Supabase REST API
     try {
       const anonKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!;
       const res = await fetch(
@@ -55,36 +53,34 @@ export default function PublicProductPage() {
     fetchProductById(productId).then((p) => setProduct(p));
   }, [productId]);
 
-  // Loading state
+  // Loading
   if (product === undefined) {
     return (
-      <div className="min-h-screen flex items-center justify-center">
-        <div className="flex flex-col items-center gap-4">
-          <div className="w-10 h-10 border-2 border-accent border-t-transparent rounded-full animate-spin" />
-          <p className="text-muted text-sm">Loading product information...</p>
+      <div className="min-h-screen flex items-center justify-center" style={{ background: "var(--color-base)" }}>
+        <div className="text-center">
+          <div className="w-6 h-6 border-2 rounded-full animate-spin mx-auto mb-3"
+            style={{ borderColor: "var(--color-border)", borderTopColor: "transparent" }} />
+          <p style={{ fontSize: "13px", color: "var(--color-muted)" }}>Verifying product...</p>
         </div>
       </div>
     );
   }
 
   // Not found
-  if (product === null) {
+  if (!product) {
     return (
-      <div className="min-h-screen flex items-center justify-center px-4">
-        <motion.div
-          initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
-          className="text-center max-w-md"
-        >
-          <div className="w-20 h-20 mx-auto mb-6 rounded-2xl flex items-center justify-center"
-            style={{ background: "rgba(220,38,38,0.1)", border: "1px solid rgba(220,38,38,0.2)" }}>
-            <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="text-danger">
-              <circle cx="12" cy="12" r="10" /><line x1="15" y1="9" x2="9" y2="15" /><line x1="9" y1="9" x2="15" y2="15" />
+      <div className="min-h-screen flex items-center justify-center px-4" style={{ background: "var(--color-base)" }}>
+        <div className="text-center">
+          <div className="w-12 h-12 rounded-xl flex items-center justify-center mx-auto mb-4"
+            style={{ background: "var(--color-surface-2)", border: "1px solid var(--color-border)" }}>
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" style={{ color: "var(--color-muted)" }}>
+              <circle cx="12" cy="12" r="10" />
+              <line x1="15" y1="9" x2="9" y2="15" /><line x1="9" y1="9" x2="15" y2="15" />
             </svg>
           </div>
-          <h1 className="text-2xl font-bold mb-2">Product Not Found</h1>
-          <p className="text-muted text-sm">This QR code doesn&apos;t match any registered product. The product may have been removed.</p>
-        </motion.div>
+          <h1 style={{ fontSize: "20px", fontWeight: 500 }} className="mb-1">Product Not Found</h1>
+          <p style={{ fontSize: "12px", color: "var(--color-muted)" }}>This QR code does not match any registered product.</p>
+        </div>
       </div>
     );
   }
@@ -92,255 +88,115 @@ export default function PublicProductPage() {
   const expired = isExpired(product.expiry_date);
   const expiringSoon = isExpiringSoon(product.expiry_date);
 
-  const details = [
-    { label: "Batch Number", value: product.batch_number, icon: "🏭" },
-    { label: "Serial Number", value: product.serial_number, icon: "🔢" },
-    { label: "GST Number", value: product.gst_number, icon: "📋" },
-    { label: "Manufacturing Date", value: formatDate(product.manufacture_date), icon: "📅" },
-    { label: "Expiry Date", value: formatDate(product.expiry_date), icon: "⏰" },
-  ];
-
   return (
-    <div className="min-h-screen pb-12">
-      {/* Hero Section */}
-      <motion.div
-        initial={{ opacity: 0 }}
-        animate={{ opacity: 1 }}
-        transition={{ duration: 0.6 }}
-        className="relative overflow-hidden"
-      >
-        <div className="absolute inset-0" style={{
-          background: "linear-gradient(135deg, rgba(27,79,114,0.08) 0%, rgba(184,134,11,0.06) 50%, rgba(184,134,11,0.04) 100%)",
-        }} />
-        <div className="absolute inset-0" style={{
-          backgroundImage: "radial-gradient(circle, rgba(27,79,114,0.08) 1px, transparent 1px)",
-          backgroundSize: "24px 24px",
-        }} />
-        <div className="absolute inset-0" style={{
-          background: "radial-gradient(ellipse at 30% 0%, rgba(27,79,114,0.1) 0%, transparent 60%)",
-        }} />
-        <div className="absolute bottom-0 left-0 right-0 h-16" style={{
-          background: "linear-gradient(to top, var(--color-background), transparent)",
-        }} />
-
-        <div className="relative px-4 pt-8 pb-10 max-w-lg mx-auto">
-          {/* Company Header */}
-          <motion.div
-            initial={{ opacity: 0, y: -10 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ delay: 0.1 }}
-            className="flex items-center justify-between mb-8"
-          >
-            <div className="flex items-center gap-2.5">
-              <div className="w-8 h-8 rounded-lg flex items-center justify-center"
-                style={{ background: "linear-gradient(135deg, rgba(27,79,114,0.2), rgba(184,134,11,0.2))", border: "1px solid rgba(27,79,114,0.3)" }}>
-                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" className="text-accent">
-                  <rect x="3" y="3" width="7" height="7" /><rect x="14" y="3" width="7" height="7" />
-                  <rect x="3" y="14" width="7" height="7" /><rect x="14" y="14" width="7" height="7" />
-                </svg>
-              </div>
-              <span className="text-sm font-bold text-foreground">Company</span>
+    <div className="min-h-screen" style={{ background: "var(--color-base)" }}>
+      <div className="max-w-lg mx-auto px-4 py-8">
+        {/* Header */}
+        <motion.div initial={{ opacity: 0, y: 12 }} animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.3 }}>
+          <div className="text-center mb-6">
+            <div className="inline-flex items-center justify-center w-10 h-10 rounded-xl mb-3"
+              style={{ background: "var(--color-surface-2)", border: "1px solid var(--color-border)" }}>
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"
+                style={{ color: "var(--color-foreground)" }}>
+                <rect x="3" y="3" width="7" height="7" /><rect x="14" y="3" width="7" height="7" />
+                <rect x="3" y="14" width="7" height="7" /><rect x="14" y="14" width="7" height="7" />
+              </svg>
             </div>
-
-            <div className="verified-badge">
+            <div className="verified-badge mx-auto w-fit mb-4">
               <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
                 <path d="M22 11.08V12a10 10 0 1 1-5.93-9.14" /><polyline points="22 4 12 14.01 9 11.01" />
               </svg>
               Verified Product
             </div>
-          </motion.div>
+          </div>
+        </motion.div>
 
-          {/* Category Badge */}
-          <motion.div
-            initial={{ opacity: 0, x: -10 }}
-            animate={{ opacity: 1, x: 0 }}
-            transition={{ delay: 0.2 }}
-          >
-            <span className="badge badge-accent text-xs mb-3">{product.category}</span>
-          </motion.div>
+        {/* Product Card */}
+        <motion.div initial={{ opacity: 0, y: 12 }} animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.3, delay: 0.1 }}
+          className="glass-card p-5 mb-4">
+          <div className="flex items-start justify-between mb-4">
+            <div>
+              <h1 style={{ fontSize: "20px", fontWeight: 500 }} className="mb-1">{product.name}</h1>
+              <span className="badge">{product.category}</span>
+            </div>
+            {expired ? (
+              <span className="badge badge-danger">Expired</span>
+            ) : expiringSoon ? (
+              <span className="badge badge-warning">Expiring Soon</span>
+            ) : (
+              <span className="badge badge-success">Active</span>
+            )}
+          </div>
 
-          {/* Product Name */}
-          <motion.h1
-            initial={{ opacity: 0, y: 10 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ delay: 0.25, duration: 0.5 }}
-            className="text-3xl sm:text-4xl font-bold mb-3 leading-tight"
-          >
-            {product.name}
-          </motion.h1>
-
-          {/* Status */}
-          {expired && (
-            <motion.div
-              initial={{ opacity: 0 }}
-              animate={{ opacity: 1 }}
-              transition={{ delay: 0.3 }}
-              className="inline-flex items-center gap-2 px-4 py-2 rounded-xl text-sm font-medium"
-              style={{ background: "rgba(220,38,38,0.12)", border: "1px solid rgba(220,38,38,0.25)", color: "var(--color-danger)" }}
-            >
-              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                <path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z" />
-                <line x1="12" y1="9" x2="12" y2="13" /><line x1="12" y1="17" x2="12.01" y2="17" />
-              </svg>
-              This product has expired
-            </motion.div>
+          {product.description && (
+            <p style={{ fontSize: "13px", color: "var(--color-muted)", lineHeight: 1.6 }} className="mb-4">{product.description}</p>
           )}
-          {expiringSoon && !expired && (
-            <motion.div
-              initial={{ opacity: 0 }}
-              animate={{ opacity: 1 }}
-              transition={{ delay: 0.3 }}
-              className="inline-flex items-center gap-2 px-4 py-2 rounded-xl text-sm font-medium"
-              style={{ background: "rgba(202,138,4,0.12)", border: "1px solid rgba(202,138,4,0.25)", color: "var(--color-warning)" }}
-            >
-              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                <circle cx="12" cy="12" r="10" /><polyline points="12 6 12 12 16 14" />
-              </svg>
-              Expiring soon — check expiry date below
-            </motion.div>
-          )}
-        </div>
-      </motion.div>
-
-      {/* Content */}
-      <div className="px-4 max-w-lg mx-auto -mt-2">
-        {/* Product Details */}
-        <motion.div
-          initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ delay: 0.35, duration: 0.5 }}
-          className="glass-card p-5 mb-4"
-        >
-          <h2 className="text-sm font-semibold uppercase tracking-wider text-muted mb-4 flex items-center gap-2">
-            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-              <circle cx="12" cy="12" r="10" /><line x1="12" y1="16" x2="12" y2="12" /><line x1="12" y1="8" x2="12.01" y2="8" />
-            </svg>
-            Product Details
-          </h2>
 
           <div className="space-y-0">
-            {details.map((detail, index) => (
-              detail.value && detail.value !== "—" && (
-                <motion.div
-                  key={detail.label}
-                  initial={{ opacity: 0, x: -10 }}
-                  animate={{ opacity: 1, x: 0 }}
-                  transition={{ delay: 0.4 + index * 0.05 }}
-                  className="flex items-center justify-between py-3.5 border-b border-border last:border-0"
-                >
-                  <span className="text-sm text-muted flex items-center gap-2">
-                    <span className="text-base">{detail.icon}</span>
-                    {detail.label}
-                  </span>
-                  <span className={`text-sm font-medium ${
-                    detail.label === "Expiry Date" && expired ? "text-danger" :
-                    detail.label === "Expiry Date" && expiringSoon ? "text-warning" : "text-foreground"
-                  }`}>
-                    {detail.value}
-                  </span>
-                </motion.div>
-              )
+            {[
+              { label: "GST Number", value: product.gst_number },
+              { label: "Batch Number", value: product.batch_number },
+              { label: "Serial Number", value: product.serial_number },
+              { label: "Manufacture Date", value: product.manufacture_date ? formatDate(product.manufacture_date) : "" },
+              { label: "Expiry Date", value: product.expiry_date ? formatDate(product.expiry_date) : "" },
+            ].filter(f => f.value).map((field) => (
+              <div key={field.label} className="flex justify-between items-baseline py-3"
+                style={{ borderBottom: "1px solid var(--color-border)" }}>
+                <span className="section-label">{field.label}</span>
+                <span style={{
+                  fontSize: "13px",
+                  fontWeight: 500,
+                  color: field.label === "Expiry Date" && expired ? "var(--color-danger)" :
+                         field.label === "Expiry Date" && expiringSoon ? "var(--color-warning)" :
+                         "var(--color-foreground)"
+                }}>{field.value}</span>
+              </div>
             ))}
           </div>
         </motion.div>
 
         {/* Additional Info */}
-        {product.additional_info && Object.keys(product.additional_info).length > 0 && (
-          <motion.div
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ delay: 0.5, duration: 0.5 }}
-            className="glass-card p-5 mb-4"
-          >
-            <h2 className="text-sm font-semibold uppercase tracking-wider text-muted mb-4 flex items-center gap-2">
-              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                <line x1="8" y1="6" x2="21" y2="6" /><line x1="8" y1="12" x2="21" y2="12" /><line x1="8" y1="18" x2="21" y2="18" />
-                <line x1="3" y1="6" x2="3.01" y2="6" /><line x1="3" y1="12" x2="3.01" y2="12" /><line x1="3" y1="18" x2="3.01" y2="18" />
-              </svg>
-              Specifications
-            </h2>
+        {Object.keys(product.additional_info || {}).length > 0 && (
+          <motion.div initial={{ opacity: 0, y: 12 }} animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.3, delay: 0.2 }}
+            className="glass-card p-5 mb-4">
+            <p className="section-label mb-3">Additional Information</p>
             <div className="space-y-0">
-              {Object.entries(product.additional_info).map(([key, value], index) => (
-                <motion.div
-                  key={key}
-                  initial={{ opacity: 0, x: -10 }}
-                  animate={{ opacity: 1, x: 0 }}
-                  transition={{ delay: 0.55 + index * 0.05 }}
-                  className="flex items-center justify-between py-3.5 border-b border-border last:border-0"
-                >
-                  <span className="text-sm text-muted">{key}</span>
-                  <span className="text-sm font-medium text-foreground">{value}</span>
-                </motion.div>
+              {Object.entries(product.additional_info).map(([key, val]) => (
+                <div key={key} className="flex justify-between items-baseline py-3"
+                  style={{ borderBottom: "1px solid var(--color-border)" }}>
+                  <span style={{ fontSize: "12px", color: "var(--color-muted)" }}>{key}</span>
+                  <span style={{ fontSize: "13px", fontWeight: 500, color: "var(--color-foreground)" }}>{val}</span>
+                </div>
               ))}
             </div>
           </motion.div>
         )}
 
-        {/* Description */}
-        {product.description && (
-          <motion.div
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ delay: 0.55, duration: 0.5 }}
-            className="glass-card p-5 mb-4"
-          >
-            <h2 className="text-sm font-semibold uppercase tracking-wider text-muted mb-3 flex items-center gap-2">
-              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                <line x1="17" y1="10" x2="3" y2="10" /><line x1="21" y1="6" x2="3" y2="6" /><line x1="21" y1="14" x2="3" y2="14" /><line x1="17" y1="18" x2="3" y2="18" />
-              </svg>
-              Description
-            </h2>
-            <p className="text-sm text-foreground/80 leading-relaxed">{product.description}</p>
-          </motion.div>
-        )}
-
-        {/* Download Manual */}
+        {/* Manual Download */}
         {product.manual_url && (
-          <motion.div
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ delay: 0.6, duration: 0.5 }}
-            className="glass-card p-5 mb-4"
-          >
-            <h2 className="text-sm font-semibold uppercase tracking-wider text-muted mb-4 flex items-center gap-2">
-              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z" /><polyline points="14 2 14 8 20 8" />
+          <motion.div initial={{ opacity: 0, y: 12 }} animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.3, delay: 0.3 }}
+            className="glass-card p-5 mb-4">
+            <p className="section-label mb-3">Product Manual</p>
+            <a href={product.manual_url} target="_blank" rel="noopener noreferrer"
+              className="btn-secondary w-full no-underline" style={{ display: "flex" }}>
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4" /><polyline points="7 10 12 15 17 10" /><line x1="12" y1="15" x2="12" y2="3" />
               </svg>
-              Product Manual
-            </h2>
-            <a
-              href={product.manual_url}
-              download
-              target="_blank"
-              rel="noopener noreferrer"
-              className="btn-primary w-full no-underline"
-            >
-              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4" />
-                <polyline points="7 10 12 15 17 10" />
-                <line x1="12" y1="15" x2="12" y2="3" />
-              </svg>
-              Download Product Manual (PDF)
+              Download Manual (PDF)
             </a>
           </motion.div>
         )}
 
         {/* Footer */}
-        <motion.div
-          initial={{ opacity: 0 }}
-          animate={{ opacity: 1 }}
-          transition={{ delay: 0.7 }}
-          className="text-center mt-8 mb-4"
-        >
-          <div className="flex items-center justify-center gap-2 text-muted text-xs mb-2">
-            <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-              <rect x="3" y="3" width="7" height="7" /><rect x="14" y="3" width="7" height="7" />
-              <rect x="3" y="14" width="7" height="7" /><rect x="14" y="14" width="7" height="7" />
-            </svg>
-            Powered by Company Traceability
-          </div>
-          <p className="text-[11px] text-muted/50">Product information verified and authentic</p>
-        </motion.div>
+        <div className="text-center mt-6">
+          <p style={{ fontSize: "11px", color: "var(--color-tertiary)" }}>
+            Verified by ScanQ · {formatDate(product.created_at)}
+          </p>
+        </div>
       </div>
     </div>
   );

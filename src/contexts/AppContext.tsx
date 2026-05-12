@@ -2,7 +2,7 @@
 
 import React, { createContext, useContext, useState, useEffect, useCallback, useRef, ReactNode } from "react";
 import { Product, ProductFormData, Toast, DashboardStats } from "@/lib/types";
-import { generateId, generateShortCode } from "@/lib/utils";
+import { generateId } from "@/lib/utils";
 
 // ===== Check if Supabase is configured =====
 const isSupabaseConfigured = () => {
@@ -14,7 +14,6 @@ const isSupabaseConfigured = () => {
 const DEMO_PRODUCTS: Product[] = [
   {
     id: "demo-001",
-    short_code: "CrpSh5m1",
     name: "CropShield Pro 500ml",
     category: "Insecticide",
     gst_number: "29ABCDE1234F1Z5",
@@ -31,7 +30,6 @@ const DEMO_PRODUCTS: Product[] = [
   },
   {
     id: "demo-002",
-    short_code: "GrnGr1Lf",
     name: "GreenGrow Fertilizer 1L",
     category: "Fertilizer",
     gst_number: "29ABCDE1234F1Z5",
@@ -48,7 +46,6 @@ const DEMO_PRODUCTS: Product[] = [
   },
   {
     id: "demo-003",
-    short_code: "WdClr250",
     name: "WeedClear Herbicide 250ml",
     category: "Herbicide",
     gst_number: "29ABCDE1234F1Z5",
@@ -300,7 +297,6 @@ export function AppProvider({ children }: { children: ReactNode }) {
         }
         const newProduct: Product = {
           id: generateId(),
-          short_code: generateShortCode(),
           ...data,
           manual_url: manualUrl,
           created_by: userEmail || "demo-admin",
@@ -339,7 +335,6 @@ export function AppProvider({ children }: { children: ReactNode }) {
         const insertData = {
           name: data.name,
           category: data.category,
-          short_code: generateShortCode(),
           gst_number: data.gst_number || "",
           batch_number: data.batch_number || "",
           serial_number: data.serial_number || "",

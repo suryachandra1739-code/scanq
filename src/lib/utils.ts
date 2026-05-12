@@ -47,8 +47,8 @@ export function getBaseUrl(): string {
   return "http://localhost:3000";
 }
 
-export function getProductUrl(shortCode: string): string {
-  return `${getBaseUrl()}/p/${shortCode}`;
+export function getProductUrl(productId: string): string {
+  return `${getBaseUrl()}/product/${productId}`;
 }
 
 export const PRODUCT_CATEGORIES = [

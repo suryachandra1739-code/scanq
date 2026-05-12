@@ -48,9 +48,9 @@ export default function ProductDetailPage() {
   }, [product]);
 
   const generateQR = useCallback(async () => {
-    if (!product?.short_code) return;
+    if (!productId) return;
     try {
-      const url = getProductUrl(product.short_code);
+      const url = getProductUrl(productId);
       const dataUrl = await QRCode.toDataURL(url, {
         width: 512,
         margin: 2,
@@ -117,7 +117,7 @@ export default function ProductDetailPage() {
       link.download = `${product.name.replace(/\s+/g, "_")}_QR.png`;
       link.click();
     } else if (format === "svg") {
-      const url = getProductUrl(product.short_code);
+      const url = getProductUrl(productId);
       QRCode.toString(url, { type: "svg", margin: 2, errorCorrectionLevel: "H" }, (err, svg) => {
         if (err || !svg) return;
         const blob = new Blob([svg], { type: "image/svg+xml" });
@@ -130,7 +130,7 @@ export default function ProductDetailPage() {
     showToast(`QR code downloaded as ${format.toUpperCase()}`, "success");
   };
 
-  const productUrl = getProductUrl(product.short_code);
+  const productUrl = getProductUrl(productId);
 
   return (
     <div className="max-w-4xl">
