@@ -16,6 +16,7 @@ export default function DashboardPage() {
     {
       label: "Total Products",
       value: stats.totalProducts,
+      href: "/admin/products",
       icon: (
         <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
           <path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z" />
@@ -25,6 +26,7 @@ export default function DashboardPage() {
     {
       label: "Added This Week",
       value: stats.recentlyAdded,
+      href: "/admin/products",
       icon: (
         <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
           <polyline points="23 6 13.5 15.5 8.5 10.5 1 18" />
@@ -35,6 +37,7 @@ export default function DashboardPage() {
     {
       label: "Expiring Soon",
       value: stats.expiringSoon,
+      href: "/admin/products?status=expiring",
       icon: (
         <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
           <circle cx="12" cy="12" r="10" />
@@ -45,6 +48,7 @@ export default function DashboardPage() {
     {
       label: "Categories",
       value: stats.categories,
+      href: "/admin/products",
       icon: (
         <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
           <line x1="8" y1="6" x2="21" y2="6" />
@@ -87,7 +91,7 @@ export default function DashboardPage() {
             key={card.label}
             variants={itemVariants}
             className="stat-card cursor-pointer"
-            onClick={() => router.push('/admin/products')}
+            onClick={() => router.push(card.href)}
           >
             <div className="flex items-start justify-between mb-3">
               <div className="w-7 h-7 rounded-lg flex items-center justify-center"

@@ -1,17 +1,27 @@
 "use client";
 
-import { useState, useMemo } from "react";
+import { useState, useMemo, Suspense, useEffect } from "react";
 import Link from "next/link";
-import { useRouter } from "next/navigation";
+import { useRouter, useSearchParams } from "next/navigation";
 import { motion } from "framer-motion";
 import { useApp } from "@/contexts/AppContext";
 import { formatDate, isExpired, isExpiringSoon, truncate, getProductUrl } from "@/lib/utils";
 
-export default function ProductListPage() {
+function ProductListContent() {
   const router = useRouter();
+  const searchParams = useSearchParams();
   const { products, deleteProduct, showToast } = useApp();
   const [search, setSearch] = useState("");
   const [categoryFilter, setCategoryFilter] = useState("all");
+  const [statusFilter, setStatusFilter] = useState("all");
+  
+  useEffect(() => {
+    const statusParam = searchParams.get("status");
+    if (statusParam) setStatusFilter(statusParam);
+    const catParam = searchParams.get("category");
+    if (catParam) setCategoryFilter(catParam);
+  }, [searchParams]);
+
   const [deleteId, setDeleteId] = useState<string | null>(null);
 
   const categories = useMemo(() => {
@@ -27,9 +37,15 @@ export default function ProductListPage() {
         p.batch_number?.toLowerCase().includes(search.toLowerCase()) ||
         p.serial_number?.toLowerCase().includes(search.toLowerCase());
       const matchesCategory = categoryFilter === "all" || p.category === categoryFilter;
-      return matchesSearch && matchesCategory;
+      
+      let matchesStatus = true;
+      if (statusFilter === "active") matchesStatus = !isExpired(p.expiry_date);
+      else if (statusFilter === "expiring") matchesStatus = isExpiringSoon(p.expiry_date);
+      else if (statusFilter === "expired") matchesStatus = isExpired(p.expiry_date);
+
+      return matchesSearch && matchesCategory && matchesStatus;
     });
-  }, [products, search, categoryFilter]);
+  }, [products, search, categoryFilter, statusFilter]);
 
   const handleDelete = async (id: string) => {
     try {
@@ -81,6 +97,16 @@ export default function ProductListPage() {
           {categories.map((cat) => (
             <option key={cat} value={cat}>{cat}</option>
           ))}
+        </select>
+        <select
+          value={statusFilter}
+          onChange={(e) => setStatusFilter(e.target.value)}
+          className="input-field w-auto min-w-[140px] cursor-pointer"
+        >
+          <option value="all">All Statuses</option>
+          <option value="active">Active</option>
+          <option value="expiring">Expiring Soon</option>
+          <option value="expired">Expired</option>
         </select>
       </div>
 
@@ -226,5 +252,17 @@ export default function ProductListPage() {
         </div>
       )}
     </div>
+  );
+}
+
+export default function ProductListPage() {
+  return (
+    <Suspense fallback={
+      <div className="flex items-center justify-center p-12">
+        <div className="w-6 h-6 border-2 border-foreground border-t-transparent rounded-full animate-spin" />
+      </div>
+    }>
+      <ProductListContent />
+    </Suspense>
   );
 }
